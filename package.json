@@ -1,0 +1,53 @@
+{
+  "name": "acme-salary-management",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*"],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others --names server,client \"npm run dev -w apps/server\" \"npm run dev -w apps/client\"",
+    "build": "npm run build -w apps/client && npm run build -w apps/server",
+    "start": "npm run start -w apps/server",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit && npm run typecheck --workspaces",
+    "test": "vitest run",
+    "test:architecture": "vitest run tests/architecture",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "npm run build && playwright test",
+    "db:generate": "npm run db:generate -w apps/server",
+    "db:migrate": "npm run db:migrate -w apps/server",
+    "hooks:install": "git config --local core.hooksPath .githooks",
+    "check:commit": "npm run lint && npm run typecheck && npm run test:architecture",
+    "check": "npm run lint && npm run typecheck && npm test && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@eslint/css": "^2.0.1",
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^2.1.1",
+    "@eslint/plugin-kit": "^0.7.0",
+    "@html-eslint/eslint-plugin": "^0.68.0",
+    "@playwright/test": "^1.65.1",
+    "@stylistic/eslint-plugin": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "@types/supertest": "^6.0.0",
+    "concurrently": "^10.0.7",
+    "eslint": "^10.15.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.8",
+    "libpg-query": "^18.0.0",
+    "supertest": "^7.0.0",
+    "typescript": "~6.0.0",
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^5.1.1"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "^0.28.0"
+    },
+    "drizzle-kit": {
+      "esbuild": "^0.28.0"
+    }
+  }
+}
