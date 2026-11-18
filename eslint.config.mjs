@@ -6,15 +6,22 @@ import stylistic from "@stylistic/eslint-plugin";
 import { defineConfig, globalIgnores } from "eslint/config";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import { tailwind4 } from "tailwind-csstree";
 import tseslint from "typescript-eslint";
 
+import { designSystem } from "./tooling/eslint/design-system.mjs";
 import { noComments } from "./tooling/eslint/no-comments.mjs";
 import { postgresql } from "./tooling/eslint/postgresql.mjs";
 
 const local = {
-  rules: { "no-comments": noComments },
+  rules: { "design-system": designSystem, "no-comments": noComments },
   languages: { postgresql },
 };
+const cssInJs = {
+  group: ["styled-components", "@emotion/*", "@vanilla-extract/*", "styled-jsx", "@linaria/*"],
+  message: "Use design system utilities for component styling.",
+};
+const stylesheetImport = "\\.(?:css|scss|sass|less|styl|stylus|pcss|postcss)(?:$|[?#])";
 
 export default defineConfig(
   globalIgnores([
@@ -69,6 +76,25 @@ export default defineConfig(
     extends: [reactHooks.configs.flat.recommended, reactRefresh.configs.vite],
   },
   {
+    files: ["apps/client/src/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"],
+    rules: {
+      "local/design-system": "error",
+      "no-restricted-imports": ["error", { patterns: [
+        cssInJs,
+        { regex: stylesheetImport, message: "Load the design system stylesheet from the app entry point." },
+      ] }],
+    },
+  },
+  {
+    files: ["apps/client/src/main.tsx"],
+    rules: {
+      "no-restricted-imports": ["error", { patterns: [
+        cssInJs,
+        { regex: `^(?!\\./shared/styles/theme\\.css$).*${stylesheetImport}`, message: "Load only the design system stylesheet." },
+      ] }],
+    },
+  },
+  {
     files: ["**/*.jsx"],
     languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
   },
@@ -89,6 +115,20 @@ export default defineConfig(
     plugins: { local },
     language: "css/css",
     rules: { "local/no-comments": "error" },
+  },
+  {
+    files: ["apps/client/**/*.html", "apps/client/**/*.{css,scss,sass,less,styl,stylus,pcss,postcss}"],
+    ignores: ["apps/client/src/shared/styles/theme.css"],
+    plugins: { local },
+    rules: { "local/design-system": "error" },
+  },
+  {
+    files: ["apps/client/**/*.{scss,sass,less,styl,stylus,pcss,postcss}"],
+    language: "css/css",
+  },
+  {
+    files: ["apps/client/src/shared/styles/theme.css"],
+    languageOptions: { customSyntax: tailwind4 },
   },
   {
     files: ["**/*.json"],

@@ -38,6 +38,7 @@
     "eslint-plugin-react-refresh": "^0.5.8",
     "libpg-query": "^18.0.0",
     "supertest": "^7.0.0",
+    "tailwind-csstree": "^0.4.2",
     "typescript": "~6.0.0",
     "typescript-eslint": "^8.73.0",
     "vitest": "^5.1.1"

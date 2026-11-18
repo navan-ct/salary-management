@@ -1,0 +1,51 @@
+import { Button as BaseButton } from "@base-ui/react/button";
+import { LoaderCircle } from "lucide-react";
+import { type ReactElement, type ReactNode, type Ref } from "react";
+
+interface ButtonProps {
+  children: ReactNode;
+  variant?: "primary" | "secondary" | "quiet";
+  type?: "button" | "submit";
+  onClick?: () => void;
+  disabled?: boolean | undefined;
+  focusableWhenDisabled?: boolean;
+  pendingLabel?: string | undefined;
+  ref?: Ref<HTMLElement>;
+}
+
+export function Button({
+  children, variant = "primary", type = "button", onClick, disabled, focusableWhenDisabled = false, pendingLabel, ref,
+}: ButtonProps): ReactElement {
+  return (
+    <BaseButton
+      ref={ref}
+      type={type}
+      disabled={disabled === true || pendingLabel !== undefined}
+      focusableWhenDisabled={focusableWhenDisabled || (disabled !== true && pendingLabel !== undefined)}
+      aria-busy={pendingLabel !== undefined || undefined}
+      onClick={onClick}
+      className={`inline-flex min-h-control items-center justify-center gap-sm rounded-control border px-md py-xs text-body font-semibold focus-ring motion-safe:transition-colors disabled:cursor-not-allowed data-disabled:cursor-not-allowed data-disabled:border-line data-disabled:bg-subtle data-disabled:text-muted ${
+        variant === "primary" ? "border-brand bg-brand text-on-brand not-data-disabled:hover:border-brand-hover not-data-disabled:hover:bg-brand-hover" :
+          variant === "secondary" ? "border-control-line bg-surface text-ink not-data-disabled:hover:bg-subtle" :
+            "border-transparent text-brand not-data-disabled:hover:bg-brand-soft"
+      }`}
+    >
+      {pendingLabel === undefined ? children : (
+        <>
+          <LoaderCircle aria-hidden="true" className="size-icon shrink-0 motion-safe:animate-spin" />
+          {pendingLabel}
+        </>
+      )}
+    </BaseButton>
+  );
+}
+
+interface TextLinkProps { href: string; children: ReactNode; label?: string }
+
+export function TextLink({ href, children, label }: TextLinkProps): ReactElement {
+  return (
+    <a href={href} aria-label={label} className="rounded-control font-semibold text-brand underline hover:text-brand-hover focus-ring">
+      {children}
+    </a>
+  );
+}

@@ -1,0 +1,108 @@
+@import "tailwindcss" source("../../../");
+
+@theme static {
+  --*: initial;
+  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.375rem;
+  --text-heading: 1.125rem;
+  --text-heading--line-height: 1.625rem;
+  --text-title: 1.75rem;
+  --text-title--line-height: 2.125rem;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --tracking-title: -0.025em;
+
+  --color-canvas: #f3f6fc;
+  --color-surface: #ffffff;
+  --color-subtle: #eaf0fa;
+  --color-ink: #172644;
+  --color-muted: #495e7d;
+  --color-line: #cfdbed;
+  --color-control-line: #7589a8;
+  --color-brand: #2555bd;
+  --color-brand-hover: #1d409a;
+  --color-brand-soft: #e6eeff;
+  --color-on-brand: #ffffff;
+  --color-focus: #2b61d0;
+  --color-danger: #a1262b;
+  --color-danger-soft: #fdf0f0;
+  --color-warning: #77500d;
+  --color-warning-soft: #fff5df;
+  --color-success: #246044;
+  --color-success-soft: #e7f4eb;
+  --color-scrim: rgb(15 28 60 / 52%);
+
+  --spacing-0: 0rem;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+  --spacing-2xl: 2rem;
+  --spacing-3xl: 3rem;
+  --spacing-icon: 1rem;
+  --spacing-control: 2.75rem;
+  --spacing-textarea: 6rem;
+  --spacing-menu: 18rem;
+  --container-form: 28rem;
+  --container-table: 42rem;
+  --container-page: 72rem;
+  --breakpoint-sm: 42rem;
+
+  --radius-control: 0.5rem;
+  --radius-panel: 0.75rem;
+  --shadow-raised: 0 1px 2px rgb(15 28 60 / 8%);
+  --shadow-overlay: 0 12px 32px rgb(15 28 60 / 16%), 0 2px 6px rgb(15 28 60 / 9%);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  --animate-spin: spin 800ms linear infinite;
+  --outline-size: 2px;
+  --outline-offset: 2px;
+  --layer-dialog: 20;
+  --layer-popover: 30;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@utility focus-ring {
+  @variant focus-visible {
+    outline: var(--outline-size) solid var(--color-focus);
+    outline-offset: var(--outline-offset);
+  }
+}
+
+@utility field-control {
+  @apply w-full min-w-0 rounded-control border border-control-line bg-surface px-md text-body text-ink focus-ring;
+  @apply placeholder:text-muted data-placeholder:text-muted data-invalid:border-danger;
+  @apply disabled:cursor-not-allowed disabled:border-line disabled:bg-subtle disabled:text-muted;
+  @apply enabled:not-data-invalid:hover:border-brand;
+  @apply motion-safe:transition-colors;
+}
+
+@utility search-control {
+  &::-webkit-search-cancel-button {
+    appearance: none;
+  }
+}
+
+@utility select-position {
+  width: var(--anchor-width);
+  padding-block: var(--spacing-xs);
+  z-index: var(--layer-popover);
+}
+
+@utility select-scroll {
+  max-block-size: min(calc(var(--available-height) - var(--spacing-xs) * 2), var(--spacing-menu));
+  overflow-y: auto;
+}
+
+@utility layer-dialog {
+  z-index: var(--layer-dialog);
+}

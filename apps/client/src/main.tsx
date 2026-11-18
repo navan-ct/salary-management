@@ -1,10 +1,13 @@
-import { StrictMode } from "react";
+import { lazy, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "./app/App";
-import "./app/styles.css";
+import "./shared/styles/theme.css";
 
 const root = document.getElementById("root");
+const Preview = import.meta.env.DEV && window.location.pathname === "/design-system"
+  ? lazy(() => import("./app/routes/DesignSystemPreview"))
+  : null;
 
 if (root === null) {
   throw new Error("The application root element is missing.");
@@ -12,6 +15,6 @@ if (root === null) {
 
 createRoot(root).render(
   <StrictMode>
-    <App />
+    {Preview ? <Suspense fallback={null}><Preview /></Suspense> : <App />}
   </StrictMode>,
 );

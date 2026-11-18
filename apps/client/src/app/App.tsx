@@ -1,5 +1,7 @@
 import { type ReactElement, useEffect, useState } from "react";
 
+import { PageContainer, PageHeader, Panel } from "../shared/components/Layout";
+
 const statusText = {
   checking: "Checking API connection…",
   ready: "API is connected.",
@@ -28,9 +30,11 @@ export function App(): ReactElement {
   }, []);
 
   return (
-    <main>
-      <h1>ACME Salary Management</h1>
-      <p role="status">{statusText[status]}</p>
-    </main>
+    <PageContainer narrow>
+      <Panel>
+        <PageHeader title="ACME Salary Management" />
+        <p role="status" className="text-muted">{statusText[status]}</p>
+      </Panel>
+    </PageContainer>
   );
 }
