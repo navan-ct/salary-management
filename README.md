@@ -4,6 +4,7 @@ An internal web app for ACME’s HR team to manage employee salaries.
 
 - [Live demo](https://incubyte.navaneethct.com)
 - [Video walkthrough](walkthrough.mp4)
+- [Project conversations](conversations/)
 - [Product requirements](REQUIREMENTS.md)
 - [UI wireframes in Whimsical](https://whimsical.com/navaneeth-s-workspace7/acme-salary-management-ui-wireframes-SYcGuCyRwbG9ZjcwNx9mrB)
 - [Assessment brief](ASSESSMENT.md)

@@ -7,7 +7,7 @@ import { expect, it } from "vitest";
 const workspace = fileURLToPath(new URL("../../", import.meta.url));
 
 const allowedSubdirectories = new Map<string, readonly string[]>([
-  ["", [".github", ".githooks", "apps", "docs", "infra", "tests", "tooling"]],
+  ["", [".github", ".githooks", "apps", "conversations", "docs", "infra", "tests", "tooling"]],
   [".github", ["ISSUE_TEMPLATE", "workflows"]],
   ["apps", ["client", "server"]],
   ["apps/client", ["public", "src"]],
