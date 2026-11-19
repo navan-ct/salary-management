@@ -8,6 +8,13 @@
       "when": 1795050249185,
       "tag": "0000_auth",
       "breakpoints": false
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795056612244,
+      "tag": "0001_salary_management",
+      "breakpoints": false
     }
   ]
 }
