@@ -1,5 +1,5 @@
-import { type ReactElement, useCallback, useState } from "react";
-import { useLocation, useParams } from "react-router";
+import { type ReactElement, useCallback } from "react";
+import { useLocation, useNavigate, useParams } from "react-router";
 
 import { Button, TextLink } from "../../../shared/components/Button";
 import { DataTable, type TableColumn } from "../../../shared/components/DataTable";
@@ -8,6 +8,7 @@ import { DetailList, PageHeader, Panel } from "../../../shared/components/Layout
 import { type SalaryChange, getEmployeeRecord } from "../api/employees";
 import { useEmployeeRequest } from "../hooks/use-employee-request";
 import { formatSalary, formatSavedAt } from "../utils/format";
+import { employeeRecordPath, employeeRecordState } from "../utils/record-navigation";
 
 const historyColumns: readonly TableColumn<SalaryChange>[] = [
   {
@@ -29,14 +30,13 @@ const historyColumns: readonly TableColumn<SalaryChange>[] = [
 
 export function EmployeeRecordPage({ onSessionExpired }: { onSessionExpired: () => void }): ReactElement {
   const { employeeId = "" } = useParams();
-  const state: unknown = useLocation().state;
-  const directorySearch = typeof state === "object" && state !== null && "directorySearch" in state &&
-    typeof state.directorySearch === "string" && state.directorySearch.startsWith("?") ? state.directorySearch : "";
+  const navigate = useNavigate();
+  const { directorySearch, salarySaved } = employeeRecordState(useLocation().state);
   const directory = `/employees${directorySearch}`;
   const back = { label: "Employee directory", to: directory };
   const load = useCallback((signal: AbortSignal) => getEmployeeRecord(employeeId, signal), [employeeId]);
   const { result, retry } = useEmployeeRequest(load, onSessionExpired);
-  const [salaryActionEmployee, setSalaryActionEmployee] = useState<string>();
+  const confirmation = salarySaved ? <Notice title="Salary change saved" tone="success" announce /> : null;
 
   switch (result.status) {
     case "loading":
@@ -48,6 +48,7 @@ export function EmployeeRecordPage({ onSessionExpired }: { onSessionExpired: () 
       return (
         <>
           <PageHeader title="Employee record" back={back} />
+          {confirmation}
           <StatePanel state="error" title="Couldn’t load the employee record" description="Try loading the record again."
             action={<Button variant="secondary" onClick={retry}>Retry</Button>} />
         </>
@@ -57,6 +58,7 @@ export function EmployeeRecordPage({ onSessionExpired }: { onSessionExpired: () 
       return (
         <>
           <PageHeader title={employee.fullName} back={back} />
+          {confirmation}
           <Panel>
             <DetailList details={[
               { label: "Employee ID", value: employee.employeeId },
@@ -71,10 +73,9 @@ export function EmployeeRecordPage({ onSessionExpired }: { onSessionExpired: () 
                 emphasis: true,
               }]} />
               <Button onClick={() => {
-                setSalaryActionEmployee(employee.employeeId);
+                void navigate(`${employeeRecordPath(employeeId)}/change-salary`, { state: { directorySearch } });
               }}>Change salary</Button>
             </div>
-            {salaryActionEmployee === employee.employeeId && <Notice announce title="Salary editing is not available yet." />}
           </Panel>
           <Panel title="Salary history">
             {history.length === 0

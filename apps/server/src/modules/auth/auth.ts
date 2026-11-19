@@ -11,6 +11,12 @@ export interface AuthSettings {
   baseURL: string;
 }
 
+declare module "express-serve-static-core" {
+  interface Locals {
+    manager?: { id: string; name: string };
+  }
+}
+
 export function createAuth(db: Database, { secret, baseURL }: AuthSettings) {
   return betterAuth({
     appName: "ACME Salary Management",
@@ -40,6 +46,8 @@ export function requireSession(auth: ReturnType<typeof createAuth>): RequestHand
       return;
     }
 
+    const { id, name } = response.user;
+    res.locals.manager = { id, name };
     next();
   };
 }

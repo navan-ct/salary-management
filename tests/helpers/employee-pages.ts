@@ -5,14 +5,14 @@ import { expireAuthSessions, withTestAccount } from "./auth-account.js";
 import { seedEmployeeRecords } from "./employee-records.js";
 
 type EmployeeRecords = Awaited<ReturnType<typeof seedEmployeeRecords>>;
-interface HrSession { db: Database; expire: () => Promise<void> }
+interface HrSession { db: Database; name: string; expire: () => Promise<void> }
 
 export const test = base.extend<{ records: EmployeeRecords; hrSession: HrSession }>({
   hrSession: async ({ page }, use) => {
-    await withTestAccount(async ({ id, email, password }, db) => {
+    await withTestAccount(async ({ id, email, name, password }, db) => {
       await expect(await page.request.post("/api/auth/sign-in/email", { data: { email, password } })).toBeOK();
 
-      await use({ db, expire: async () => {
+      await use({ db, name, expire: async () => {
         expect(await expireAuthSessions(db, id)).toBe(1);
       } });
     });

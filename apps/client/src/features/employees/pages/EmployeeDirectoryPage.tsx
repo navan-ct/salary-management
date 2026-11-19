@@ -10,6 +10,7 @@ import { SearchField } from "../../../shared/components/TextField";
 import { type Employee, getDirectory } from "../api/employees";
 import { useEmployeeRequest } from "../hooks/use-employee-request";
 import { formatSalary } from "../utils/format";
+import { employeeRecordPath } from "../utils/record-navigation";
 
 const countFormat = new Intl.NumberFormat("en");
 
@@ -58,7 +59,7 @@ export function EmployeeDirectoryPage({ onSessionExpired }: { onSessionExpired: 
     {
       id: "name", header: "Employee name", rowHeader: true,
       render: ({ employeeId, fullName }) => (
-        <TextLink to={`/employees/${encodeURIComponent(employeeId)}`} state={{ directorySearch }}>{fullName}</TextLink>
+        <TextLink to={employeeRecordPath(employeeId)} state={{ directorySearch }}>{fullName}</TextLink>
       ),
     },
     { id: "id", header: "Employee ID", render: ({ employeeId }) => employeeId },

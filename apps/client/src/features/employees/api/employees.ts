@@ -32,6 +32,28 @@ export interface SalaryChange {
   editorName: string;
 }
 
+export interface SalaryCurrency { code: string; minorUnits: number }
+
+export interface EmployeeRecord {
+  employee: Employee & { salaryVersion: number };
+  history: SalaryChange[];
+  currencies: SalaryCurrency[];
+}
+
+interface SalaryDraft {
+  annualBaseSalary: string;
+  salaryCurrencyCode: string;
+  salaryVersion: number;
+  reason: string;
+}
+
+const salaryFields = ["annualBaseSalary", "salaryCurrencyCode", "reason"] as const;
+export type SalaryFieldErrors = Partial<Record<(typeof salaryFields)[number], string>>;
+
+export type SalarySaveResult =
+  | { status: "saved" | "expired" | "failure" | "conflict" | "unknown" }
+  | { status: "invalid"; fields: SalaryFieldErrors; message?: string };
+
 export class EmployeeRequestError extends Error {
   readonly status: number;
 
@@ -54,12 +76,61 @@ export function getDirectory(query: string, signal: AbortSignal) {
   return get<DirectoryResult>(`/api/employees${query ? `?${query}` : ""}`, signal);
 }
 
-export async function getEmployeeRecord(employeeId: string, signal: AbortSignal) {
-  const path = `/api/employees/${encodeURIComponent(employeeId)}`;
-  const [{ employee }, { history }] = await Promise.all([
-    get<{ employee: Employee }>(path, signal),
-    get<{ history: SalaryChange[] }>(`${path}/salary-history`, signal),
-  ]);
+export function getEmployeeRecord(employeeId: string, signal: AbortSignal) {
+  return get<EmployeeRecord>(`/api/employees/${encodeURIComponent(employeeId)}`, signal);
+}
 
-  return { employee, history };
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+export async function saveEmployeeSalary(employeeId: string, draft: SalaryDraft, signal: AbortSignal): Promise<SalarySaveResult> {
+  const response = await fetch(`/api/employees/${encodeURIComponent(employeeId)}/salary`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(draft),
+    signal: AbortSignal.any([signal, AbortSignal.timeout(30_000)]),
+  });
+
+  if (response.status === 401) {
+    return { status: "expired" };
+  }
+
+  const body: unknown = await response.json();
+  if (response.ok && isObject(body) && body.salaryVersion === draft.salaryVersion + 1) {
+    return { status: "saved" };
+  }
+  if (!isObject(body) || !isObject(body.error)) {
+    return { status: "unknown" };
+  }
+
+  const { code, fields } = body.error;
+  if (response.status === 400 && code === "INVALID_SALARY_DRAFT") {
+    const errors: SalaryFieldErrors = {};
+    if (isObject(fields)) {
+      for (const field of salaryFields) {
+        const message = fields[field];
+        if (typeof message === "string") {
+          errors[field] = message;
+        }
+      }
+    }
+    return Object.keys(errors).length > 0 ? { status: "invalid", fields: errors } : {
+      status: "invalid", fields: {}, message: "Review the draft before trying again.",
+    };
+  }
+  if (response.status === 400 && code === "SALARY_UNCHANGED") {
+    return { status: "invalid", fields: {}, message: "Change the amount or currency before saving." };
+  }
+  if (response.status === 413 && code === "PAYLOAD_TOO_LARGE") {
+    return { status: "invalid", fields: {}, message: "Shorten the reason or salary amount before saving." };
+  }
+  if (response.status === 409 && code === "SALARY_VERSION_CONFLICT") {
+    return { status: "conflict" };
+  }
+  if (response.status === 500 && code === "SALARY_SAVE_FAILED") {
+    return { status: "failure" };
+  }
+
+  return { status: "unknown" };
 }

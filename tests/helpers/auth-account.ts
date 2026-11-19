@@ -11,11 +11,13 @@ const betterAuthFixturePasswordHash = "f006c032f59fe43e309ebafb2bc838ff:12628c67
 interface TestAccount {
   id: string;
   email: string;
+  name: string;
   password: string;
 }
 
 export async function withTestAccount(
   run: (account: TestAccount, db: Database) => Promise<void>,
+  name = "Test Account",
 ): Promise<void> {
   const id = randomUUID();
   const email = `auth-test-${id}@acme.com`;
@@ -25,7 +27,7 @@ export async function withTestAccount(
     await db.transaction(async (transaction) => {
       await transaction.execute(sql`
         insert into "user" (id, email, name, email_verified, created_at, updated_at)
-        values (${id}, ${email}, 'Test Account', true, now(), now())
+        values (${id}, ${email}, ${name}, true, now(), now())
       `);
       await transaction.execute(sql`
         insert into account (id, account_id, user_id, provider_id, password, created_at, updated_at)
@@ -34,7 +36,7 @@ export async function withTestAccount(
     });
 
     try {
-      await run({ id, email, password: fixturePassword }, db);
+      await run({ id, email, name, password: fixturePassword }, db);
     } finally {
       await db.execute(sql`delete from "user" where id = ${id}`);
     }

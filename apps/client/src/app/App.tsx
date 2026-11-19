@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 import { authClient } from "../features/auth/api/client";
 import { useSession } from "../features/auth/hooks/use-session";
 import { SignInPage } from "../features/auth/pages/SignInPage";
+import { ChangeSalaryPage } from "../features/employees/pages/ChangeSalaryPage";
 import { EmployeeDirectoryPage } from "../features/employees/pages/EmployeeDirectoryPage";
 import { EmployeeRecordPage } from "../features/employees/pages/EmployeeRecordPage";
 import { Button } from "../shared/components/Button";
@@ -59,6 +60,7 @@ function AuthenticatedApp({ name, onSignedOut, onSessionExpired }: Authenticated
         <Routes>
           <Route path={directoryPath} element={<EmployeeDirectoryPage onSessionExpired={onSessionExpired} />} />
           <Route path={`${directoryPath}/:employeeId`} element={<EmployeeRecordPage onSessionExpired={onSessionExpired} />} />
+          <Route path={`${directoryPath}/:employeeId/change-salary`} element={<ChangeSalaryPage onSessionExpired={onSessionExpired} />} />
           <Route path="*" element={<NotFoundPage directoryPath={directoryPath} />} />
         </Routes>
       </PageContainer>

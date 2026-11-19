@@ -12,6 +12,7 @@ type TextControl = FieldFeedback & {
   onValueChange?: ((value: string) => void) | undefined;
   placeholder?: string | undefined;
   required?: boolean | undefined;
+  validate?: Field.Root.Props["validate"];
   readOnly?: boolean | undefined;
   ref?: Ref<HTMLElement> | undefined;
 };
@@ -24,10 +25,10 @@ type TextFieldProps = TextControl & {
 
 export function TextField({
   label, name, description, error, disabled, value, defaultValue, onValueChange,
-  placeholder, required, readOnly, ref, type = "text", autoComplete, inputMode,
+  placeholder, required, validate, readOnly, ref, type = "text", autoComplete, inputMode,
 }: TextFieldProps): ReactElement {
   return (
-    <FieldFrame label={label} name={name} description={description} error={error} disabled={disabled}>
+    <FieldFrame label={label} name={name} description={description} error={error} disabled={disabled} validate={validate}>
       <Input
         ref={ref}
         type={type}
@@ -37,7 +38,8 @@ export function TextField({
         defaultValue={defaultValue}
         onValueChange={onValueChange}
         placeholder={placeholder}
-        required={required}
+        required={validate ? undefined : required}
+        aria-required={validate ? required : undefined}
         readOnly={readOnly}
         className="h-control field-control read-only:bg-canvas"
       />
@@ -46,17 +48,18 @@ export function TextField({
 }
 
 export function TextareaField({
-  label, name, description, error, disabled, value, defaultValue, onValueChange, placeholder, required, readOnly, ref,
+  label, name, description, error, disabled, value, defaultValue, onValueChange, placeholder, required, validate, readOnly, ref,
 }: TextControl): ReactElement {
   return (
-    <FieldFrame label={label} name={name} description={description} error={error} disabled={disabled}>
+    <FieldFrame label={label} name={name} description={description} error={error} disabled={disabled} validate={validate}>
       <Field.Control
         ref={ref}
         value={value}
         defaultValue={defaultValue}
         onValueChange={onValueChange}
         placeholder={placeholder}
-        required={required}
+        required={validate ? undefined : required}
+        aria-required={validate ? required : undefined}
         readOnly={readOnly}
         className="min-h-textarea resize-y py-sm field-control read-only:bg-canvas"
         render={<textarea />}

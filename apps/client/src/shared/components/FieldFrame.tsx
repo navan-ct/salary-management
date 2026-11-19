@@ -9,9 +9,12 @@ export interface FieldFeedback {
   disabled?: boolean | undefined;
 }
 
-export function FieldFrame({ label, name, description, error, disabled, children }: FieldFeedback & { children: ReactNode }): ReactElement {
+export function FieldFrame({ label, name, description, error, disabled, validate, children }: FieldFeedback & {
+  children: ReactNode;
+  validate?: Field.Root.Props["validate"];
+}): ReactElement {
   return (
-    <Field.Root name={name} disabled={disabled} invalid={error ? true : undefined} className="grid min-w-0 content-start gap-xs">
+    <Field.Root name={name} disabled={disabled} validate={validate} invalid={error ? true : undefined} className="grid min-w-0 content-start gap-xs">
       <Field.Label className="text-body font-semibold">{label}</Field.Label>
       {children}
       {description && <Field.Description className="text-caption text-muted">{description}</Field.Description>}

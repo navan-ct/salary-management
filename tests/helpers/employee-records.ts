@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { eq, inArray, sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 
 import type { Database } from "../../apps/server/src/db/client.js";
 import { country, currency, department, employee, salaryChange, user } from "../../apps/server/src/db/schema/index.js";
@@ -15,7 +15,7 @@ export async function seedEmployeeRecords(db: Database) {
       { code: "IN", name: "India" }, { code: "CA", name: "Canada" },
     ]).onConflictDoNothing();
     await transaction.insert(currency).values([
-      { code: "INR", minorUnits: 2 }, { code: "CAD", minorUnits: 2 }, { code: "USD", minorUnits: 2 },
+      { code: "INR", minorUnits: 2 }, { code: "CAD", minorUnits: 2 }, { code: "USD", minorUnits: 2 }, { code: "JPY", minorUnits: 0 },
     ]).onConflictDoNothing();
     await transaction.insert(department).values([{ name: "Engineering" }, { name: "Finance" }]).onConflictDoNothing();
 
@@ -76,11 +76,12 @@ export async function seedEmployeeRecords(db: Database) {
       token, groupName, missingEmployeeId, engineering, finance,
       firstPage, firstCasey, sameName, record, inCanada, inFinance, olderChange, newerChange,
       async cleanUp() {
+        const employeeIds = employees.map(({ employeeId }) => employeeId);
         await db.transaction(async (cleanup) => {
           await cleanup.execute(sql`alter table ${salaryChange} disable trigger salary_change_append_only`);
-          await cleanup.delete(salaryChange).where(eq(salaryChange.employeeId, record.employeeId));
+          await cleanup.delete(salaryChange).where(inArray(salaryChange.employeeId, employeeIds));
           await cleanup.execute(sql`alter table ${salaryChange} enable trigger salary_change_append_only`);
-          await cleanup.delete(employee).where(inArray(employee.employeeId, employees.map(({ employeeId }) => employeeId)));
+          await cleanup.delete(employee).where(inArray(employee.employeeId, employeeIds));
           await cleanup.delete(user).where(inArray(user.id, editors.map(({ id }) => id)));
         });
       },
