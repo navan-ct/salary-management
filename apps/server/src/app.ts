@@ -9,11 +9,15 @@ import type { Logger } from "pino";
 import type { Database } from "./db/client.js";
 import { handleError, sendError } from "./http/errors.js";
 import { requestLogging } from "./http/request-logging.js";
+import { type AuthSettings, createAuth, requireSession } from "./modules/auth/auth.js";
+import { createAuthRouter } from "./modules/auth/router.js";
+import { createEmployeesRouter } from "./modules/employees/router.js";
 import { createHealthRouter } from "./modules/health/router.js";
 
 interface AppOptions {
   db: Database;
   logger: Logger;
+  authSettings: AuthSettings;
   production?: boolean;
   trustProxy?: string[];
   apiRateLimit?: number;
@@ -23,6 +27,7 @@ interface AppOptions {
 export function createApp({
   db,
   logger,
+  authSettings,
   production = false,
   trustProxy = [],
   apiRateLimit = 120,
@@ -42,12 +47,11 @@ export function createApp({
   }));
   app.use(compression());
 
-  const api = Router();
-  api.use((_req, res, next) => {
+  app.use("/api", (_req, res, next) => {
     res.setHeader("Cache-Control", "no-store");
     next();
   });
-  api.use(rateLimit({
+  app.use("/api", rateLimit({
     windowMs: 60_000,
     limit: apiRateLimit,
     standardHeaders: "draft-8",
@@ -56,8 +60,15 @@ export function createApp({
       sendError(res, "rateLimited");
     },
   }));
+
+  const auth = createAuth(db, authSettings);
+  app.use("/api/auth", createAuthRouter(auth));
+
+  const api = Router();
+  api.use(["/employees", "/insights"], requireSession(auth));
   api.use(express.json({ limit: "64kb" }));
   api.use("/health", createHealthRouter(db));
+  api.use("/employees", createEmployeesRouter());
   api.use((_req, res) => {
     sendError(res, "notFound");
   });

@@ -6,12 +6,14 @@ import { afterAll, describe, expect, it } from "vitest";
 
 import { createApp } from "../../apps/server/src/app.js";
 import { createDatabase } from "../../apps/server/src/db/client.js";
+import { testAuthSecret } from "../../tooling/test-auth.js";
 import { testDatabaseUrl } from "../../tooling/test-database.js";
 
 const databaseUrl = testDatabaseUrl();
 const { db, pool } = createDatabase(databaseUrl);
 const logger = pino({ level: "silent" });
-const api = request(createApp({ db, logger, production: true }));
+const authSettings = { secret: testAuthSecret, baseURL: "http://127.0.0.1" };
+const api = request(createApp({ db, logger, authSettings, production: true }));
 
 afterAll(async () => {
   await pool.end();
@@ -39,7 +41,7 @@ describe("Express API", () => {
     const unavailable = createDatabase(databaseUrl);
     await unavailable.pool.end();
 
-    await request(createApp({ db: unavailable.db, logger })).get("/api/health/ready")
+    await request(createApp({ db: unavailable.db, logger, authSettings })).get("/api/health/ready")
       .expect(503, { error: { code: "SERVICE_UNAVAILABLE", message: "Service is unavailable." } });
   });
 
@@ -58,7 +60,7 @@ describe("Express API", () => {
   });
 
   it("rate limits repeated requests and reports the retry window", async () => {
-    const limitedApi = request(createApp({ db, logger, apiRateLimit: 2 }));
+    const limitedApi = request(createApp({ db, logger, authSettings, apiRateLimit: 2 }));
     await limitedApi.get("/api/health/live").expect(200);
     await limitedApi.get("/api/health/live").expect(200);
     await limitedApi.get("/api/health/live")

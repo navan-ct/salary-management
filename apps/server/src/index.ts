@@ -35,6 +35,7 @@ async function main(): Promise<void> {
   const app = createApp({
     db,
     logger,
+    authSettings: { secret: settings.BETTER_AUTH_SECRET, baseURL: settings.BETTER_AUTH_URL },
     production: settings.NODE_ENV === "production",
     trustProxy: settings.TRUST_PROXY,
     apiRateLimit: settings.API_RATE_LIMIT,

@@ -3,6 +3,7 @@ import { env } from "node:process";
 import { defineConfig, devices } from "@playwright/test";
 
 import { loadWorkspaceEnv } from "./tooling/load-env.js";
+import { testAuthSecret } from "./tooling/test-auth.js";
 import { testDatabaseUrl } from "./tooling/test-database.js";
 
 loadWorkspaceEnv();
@@ -18,6 +19,7 @@ const snapshotPathTemplate = "{testDir}/../snapshots/{testFileName}-{projectName
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  globalSetup: "./tests/helpers/migrate-test-database.ts",
   snapshotPathTemplate,
   expect: { toMatchAriaSnapshot: { pathTemplate: snapshotPathTemplate } },
   fullyParallel: true,
@@ -32,6 +34,8 @@ export default defineConfig({
     env: {
       NODE_ENV: "test",
       DATABASE_URL: testDatabaseUrl(),
+      BETTER_AUTH_SECRET: testAuthSecret,
+      BETTER_AUTH_URL: baseURL,
       HOST: "127.0.0.1",
       PORT: String(port),
       API_RATE_LIMIT: "1000",

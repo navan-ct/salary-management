@@ -18,14 +18,15 @@ createdb acme_salary_management_test
 cp .env.example .env
 ```
 
-Set the PostgreSQL connection URLs in `.env`.
+In `.env`, set the PostgreSQL connection URLs and choose a `DEFAULT_ACCOUNT_PASSWORD`. Use the output of `openssl rand -hex 32` for `BETTER_AUTH_SECRET`.
 
 ```sh
 npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173` in development. To serve the production build locally, run `npm run build && npm start`.
+Open `http://127.0.0.1:5173` and sign in with the email and password from `.env`.
 
 ## Checks
 

@@ -1,19 +1,17 @@
 import { expect, test } from "@playwright/test";
 
-test("loads the built React app from Express and reaches the same-origin API", async ({ page }) => {
+test("serves the built React app and the health API from the same origin", async ({ page }) => {
   const document = await page.goto("/");
 
   expect(document?.headers()["cache-control"]).toBe("no-cache");
-  await expect(page.getByRole("heading", { name: "ACME Salary Management" })).toBeVisible();
-  await expect(page.getByRole("status")).toHaveText("API is connected.");
+  await expect(page.getByRole("main")).toBeVisible();
+  await expect(await page.request.get("/api/health/ready")).toBeOK();
 });
 
-test("supports direct client navigation and keeps API and asset misses distinct", async ({ page, request }) => {
-  const document = await page.goto("/example/deep-link");
-
-  expect(document?.status()).toBe(200);
-  await expect(page.getByRole("heading", { name: "ACME Salary Management" })).toBeVisible();
-  await expect(page.getByRole("status")).toHaveText("API is connected.");
+test("serves the client for deep links and keeps API and asset misses distinct", async ({ request }) => {
+  const document = await request.get("/example/deep-link", { headers: { Accept: "text/html" } });
+  expect(document.status()).toBe(200);
+  expect(document.headers()["content-type"]).toMatch(/text\/html/u);
 
   const missingApi = await request.get("/api/missing", { headers: { Accept: "text/html" } });
   expect(missingApi.status()).toBe(404);

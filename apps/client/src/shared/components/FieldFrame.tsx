@@ -15,7 +15,9 @@ export function FieldFrame({ label, name, description, error, disabled, children
       <Field.Label className="text-body font-semibold">{label}</Field.Label>
       {children}
       {description && <Field.Description className="text-caption text-muted">{description}</Field.Description>}
-      <Field.Error match={error ? true : undefined} className="text-caption font-medium text-danger">{error}</Field.Error>
+      {error
+        ? <Field.Error match className="text-caption font-medium text-danger">{error}</Field.Error>
+        : <Field.Error className="text-caption font-medium text-danger" />}
     </Field.Root>
   );
 }

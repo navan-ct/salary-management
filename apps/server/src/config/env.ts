@@ -5,6 +5,8 @@ export const databaseUrlSchema = z.url({ protocol: /^postgres(?:ql)?$/u });
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("production"),
   DATABASE_URL: databaseUrlSchema,
+  BETTER_AUTH_SECRET: z.string().trim().min(32),
+  BETTER_AUTH_URL: z.url({ protocol: /^https?$/u }).transform((value) => new URL(value).origin),
   HOST: z.string().trim().min(1).default("127.0.0.1"),
   PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
@@ -12,6 +14,8 @@ const envSchema = z.object({
   TRUST_PROXY: z.string().default("").transform((value) =>
     value.split(",").map((entry) => entry.trim()).filter(Boolean),
   ),
+}).refine(({ NODE_ENV, BETTER_AUTH_URL }) => NODE_ENV !== "production" || BETTER_AUTH_URL.startsWith("https://"), {
+  path: ["BETTER_AUTH_URL"],
 });
 
 export function readEnv(environment: NodeJS.ProcessEnv): z.infer<typeof envSchema> {

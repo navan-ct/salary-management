@@ -2,6 +2,7 @@ import type { ErrorRequestHandler, Response } from "express";
 
 const errors = {
   badRequest: { status: 400, code: "BAD_REQUEST", message: "Invalid request." },
+  unauthorized: { status: 401, code: "UNAUTHORIZED", message: "Sign in to access salary data." },
   notFound: { status: 404, code: "NOT_FOUND", message: "Resource not found." },
   payloadTooLarge: { status: 413, code: "PAYLOAD_TOO_LARGE", message: "Request body is too large." },
   unsupportedMedia: { status: 415, code: "UNSUPPORTED_MEDIA_TYPE", message: "Unsupported request encoding." },
