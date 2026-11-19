@@ -13,6 +13,7 @@ import { type AuthSettings, createAuth, requireSession } from "./modules/auth/au
 import { createAuthRouter } from "./modules/auth/router.js";
 import { createEmployeesRouter } from "./modules/employees/router.js";
 import { createHealthRouter } from "./modules/health/router.js";
+import { createInsightsRouter } from "./modules/insights/router.js";
 
 interface AppOptions {
   db: Database;
@@ -69,6 +70,7 @@ export function createApp({
   api.use(express.json({ limit: "64kb" }));
   api.use("/health", createHealthRouter(db));
   api.use("/employees", createEmployeesRouter(db));
+  api.use("/insights", createInsightsRouter(db));
   api.use((_req, res) => {
     sendError(res, "notFound");
   });

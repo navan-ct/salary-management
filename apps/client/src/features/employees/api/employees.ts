@@ -1,3 +1,5 @@
+import { getJson } from "../../../shared/api/http";
+
 export interface Employee {
   employeeId: string;
   fullName: string;
@@ -54,30 +56,12 @@ export type SalarySaveResult =
   | { status: "saved" | "expired" | "failure" | "conflict" | "unknown" }
   | { status: "invalid"; fields: SalaryFieldErrors; message?: string };
 
-export class EmployeeRequestError extends Error {
-  readonly status: number;
-
-  constructor(status: number) {
-    super(`Employee request failed with status ${String(status)}.`);
-    this.status = status;
-  }
-}
-
-async function get<T>(path: string, signal: AbortSignal): Promise<T> {
-  const response = await fetch(path, { signal });
-  if (!response.ok) {
-    throw new EmployeeRequestError(response.status);
-  }
-
-  return (await response.json()) as T;
-}
-
 export function getDirectory(query: string, signal: AbortSignal) {
-  return get<DirectoryResult>(`/api/employees${query ? `?${query}` : ""}`, signal);
+  return getJson<DirectoryResult>(`/api/employees${query ? `?${query}` : ""}`, signal);
 }
 
 export function getEmployeeRecord(employeeId: string, signal: AbortSignal) {
-  return get<EmployeeRecord>(`/api/employees/${encodeURIComponent(employeeId)}`, signal);
+  return getJson<EmployeeRecord>(`/api/employees/${encodeURIComponent(employeeId)}`, signal);
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {

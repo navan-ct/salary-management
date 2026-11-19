@@ -5,9 +5,10 @@ import { Button, TextLink } from "../../../shared/components/Button";
 import { DataTable, type TableColumn } from "../../../shared/components/DataTable";
 import { Notice, StatePanel } from "../../../shared/components/Feedback";
 import { DetailList, PageHeader, Panel } from "../../../shared/components/Layout";
+import { useApiRequest } from "../../../shared/hooks/use-api-request";
+import { formatSalary } from "../../../shared/utils/format-salary";
 import { type SalaryChange, getEmployeeRecord } from "../api/employees";
-import { useEmployeeRequest } from "../hooks/use-employee-request";
-import { formatSalary, formatSavedAt } from "../utils/format";
+import { formatSavedAt } from "../utils/format";
 import { employeeRecordPath, employeeRecordState } from "../utils/record-navigation";
 
 const historyColumns: readonly TableColumn<SalaryChange>[] = [
@@ -35,7 +36,7 @@ export function EmployeeRecordPage({ onSessionExpired }: { onSessionExpired: () 
   const directory = `/employees${directorySearch}`;
   const back = { label: "Employee directory", to: directory };
   const load = useCallback((signal: AbortSignal) => getEmployeeRecord(employeeId, signal), [employeeId]);
-  const { result, retry } = useEmployeeRequest(load, onSessionExpired);
+  const { result, retry } = useApiRequest(load, onSessionExpired);
   const confirmation = salarySaved ? <Notice title="Salary change saved" tone="success" announce /> : null;
 
   switch (result.status) {

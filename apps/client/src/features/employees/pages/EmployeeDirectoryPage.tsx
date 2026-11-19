@@ -7,9 +7,9 @@ import { StatePanel } from "../../../shared/components/Feedback";
 import { PageHeader, Panel } from "../../../shared/components/Layout";
 import { type SelectOption, SelectField } from "../../../shared/components/SelectField";
 import { SearchField } from "../../../shared/components/TextField";
+import { useApiRequest } from "../../../shared/hooks/use-api-request";
+import { formatSalary } from "../../../shared/utils/format-salary";
 import { type Employee, getDirectory } from "../api/employees";
-import { useEmployeeRequest } from "../hooks/use-employee-request";
-import { formatSalary } from "../utils/format";
 import { employeeRecordPath } from "../utils/record-navigation";
 
 const countFormat = new Intl.NumberFormat("en");
@@ -27,7 +27,7 @@ export function EmployeeDirectoryPage({ onSessionExpired }: { onSessionExpired: 
   const country = params.get("countryCode") ?? "all";
   const department = params.get("departmentId") ?? "all";
   const load = useCallback((signal: AbortSignal) => getDirectory(directorySearch.slice(1), signal), [directorySearch]);
-  const { result, latestData, retry } = useEmployeeRequest(load, onSessionExpired, search ? 180 : 0);
+  const { result, latestData, retry } = useApiRequest(load, onSessionExpired, search ? 180 : 0);
 
   const countries = filterOptions("All countries", country,
     latestData?.countries.map(({ code, name }) => ({ value: code, label: name })) ?? []);

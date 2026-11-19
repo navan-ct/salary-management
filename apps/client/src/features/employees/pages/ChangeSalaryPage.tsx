@@ -8,9 +8,9 @@ import { Form, FormActions } from "../../../shared/components/Form";
 import { DetailList, PageHeader, Panel } from "../../../shared/components/Layout";
 import { SelectField } from "../../../shared/components/SelectField";
 import { TextField, TextareaField } from "../../../shared/components/TextField";
+import { useApiRequest } from "../../../shared/hooks/use-api-request";
+import { formatSalary } from "../../../shared/utils/format-salary";
 import { type EmployeeRecord, type SalaryFieldErrors, getEmployeeRecord, saveEmployeeSalary } from "../api/employees";
-import { useEmployeeRequest } from "../hooks/use-employee-request";
-import { formatSalary } from "../utils/format";
 import { employeeRecordPath, employeeRecordState } from "../utils/record-navigation";
 
 const currencyNames = new Intl.DisplayNames("en", { type: "currency", fallback: "none" });
@@ -175,7 +175,7 @@ export function ChangeSalaryPage({ onSessionExpired }: { onSessionExpired: () =>
   const navigate = useNavigate();
   const { directorySearch } = employeeRecordState(useLocation().state);
   const load = useCallback((signal: AbortSignal) => getEmployeeRecord(employeeId, signal), [employeeId]);
-  const { result, retry } = useEmployeeRequest(load, onSessionExpired);
+  const { result, retry } = useApiRequest(load, onSessionExpired);
 
   function openRecord(salarySaved: boolean) {
     void navigate(employeeRecordPath(employeeId), { replace: true, state: { directorySearch, salarySaved } });

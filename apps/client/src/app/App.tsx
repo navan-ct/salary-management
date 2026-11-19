@@ -7,6 +7,7 @@ import { SignInPage } from "../features/auth/pages/SignInPage";
 import { ChangeSalaryPage } from "../features/employees/pages/ChangeSalaryPage";
 import { EmployeeDirectoryPage } from "../features/employees/pages/EmployeeDirectoryPage";
 import { EmployeeRecordPage } from "../features/employees/pages/EmployeeRecordPage";
+import { PayInsightsPage } from "../features/insights/pages/PayInsightsPage";
 import { Button } from "../shared/components/Button";
 import { Notice, StatePanel } from "../shared/components/Feedback";
 import { AppShell, PageContainer } from "../shared/components/Layout";
@@ -14,6 +15,7 @@ import { NotFoundPage } from "./routes/NotFoundPage";
 
 const signInPath = "/sign-in";
 const directoryPath = "/employees";
+const insightsPath = "/insights";
 
 interface AuthenticatedAppProps {
   name: string;
@@ -50,8 +52,13 @@ function AuthenticatedApp({ name, onSignedOut, onSessionExpired }: Authenticated
     }
   }
 
+  const navigation = [
+    { label: "Employees", href: directoryPath, active: pathname.startsWith(`${directoryPath}/`), current: pathname === directoryPath },
+    { label: "Pay insights", href: insightsPath, current: pathname === insightsPath },
+  ];
+
   return (
-    <AppShell navigation={[{ label: "Employees", href: directoryPath, active: true, current: pathname === directoryPath }]}
+    <AppShell navigation={navigation}
       account={{ name, signingOut, onSignOut: () => {
         void signOut();
       } }}>
@@ -61,6 +68,7 @@ function AuthenticatedApp({ name, onSignedOut, onSessionExpired }: Authenticated
           <Route path={directoryPath} element={<EmployeeDirectoryPage onSessionExpired={onSessionExpired} />} />
           <Route path={`${directoryPath}/:employeeId`} element={<EmployeeRecordPage onSessionExpired={onSessionExpired} />} />
           <Route path={`${directoryPath}/:employeeId/change-salary`} element={<ChangeSalaryPage onSessionExpired={onSessionExpired} />} />
+          <Route path={insightsPath} element={<PayInsightsPage onSessionExpired={onSessionExpired} />} />
           <Route path="*" element={<NotFoundPage directoryPath={directoryPath} />} />
         </Routes>
       </PageContainer>

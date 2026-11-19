@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { EmployeeRequestError } from "../api/employees";
+import { HttpRequestError } from "../api/http";
 
 type Result<T> = { status: "ready"; data: T } | { status: "missing" | "error" };
 
@@ -11,7 +11,7 @@ interface Response<T> {
   latestData: T | undefined;
 }
 
-export function useEmployeeRequest<T>(
+export function useApiRequest<T>(
   load: (signal: AbortSignal) => Promise<T>,
   onSessionExpired: () => void,
   delay = 0,
@@ -38,7 +38,7 @@ export function useEmployeeRequest<T>(
           return;
         }
 
-        const status = error instanceof EmployeeRequestError ? error.status : undefined;
+        const status = error instanceof HttpRequestError ? error.status : undefined;
         if (status === 401) {
           onSessionExpired();
           return;
