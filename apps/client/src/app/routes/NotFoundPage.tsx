@@ -7,7 +7,7 @@ export function NotFoundPage({ directoryPath }: { directoryPath: string }): Reac
   return (
     <>
       <PageHeader title="Page not found" />
-      <TextLink href={directoryPath}>Employee directory</TextLink>
+      <TextLink to={directoryPath}>Employee directory</TextLink>
     </>
   );
 }

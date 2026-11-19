@@ -1,6 +1,7 @@
 import { Button as BaseButton } from "@base-ui/react/button";
 import { LoaderCircle } from "lucide-react";
 import { type ReactElement, type ReactNode, type Ref } from "react";
+import { Link } from "react-router";
 
 interface ButtonProps {
   children: ReactNode;
@@ -40,12 +41,19 @@ export function Button({
   );
 }
 
-interface TextLinkProps { href: string; children: ReactNode; label?: string }
+interface TextLinkProps {
+  to: string;
+  state?: unknown;
+  reloadDocument?: boolean;
+  children: ReactNode;
+  label?: string;
+}
 
-export function TextLink({ href, children, label }: TextLinkProps): ReactElement {
+export function TextLink({ to, state, reloadDocument = false, children, label }: TextLinkProps): ReactElement {
   return (
-    <a href={href} aria-label={label} className="rounded-control font-semibold text-brand underline hover:text-brand-hover focus-ring">
+    <Link to={to} state={state} reloadDocument={reloadDocument} aria-label={label}
+      className="rounded-control font-semibold text-brand underline hover:text-brand-hover focus-ring">
       {children}
-    </a>
+    </Link>
   );
 }

@@ -1,5 +1,6 @@
 import { lazy, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router";
 
 import { App } from "./app/App";
 import "./shared/styles/theme.css";
@@ -15,6 +16,8 @@ if (root === null) {
 
 createRoot(root).render(
   <StrictMode>
-    {Preview ? <Suspense fallback={null}><Preview /></Suspense> : <App />}
+    <BrowserRouter useTransitions={false}>
+      {Preview ? <Suspense fallback={null}><Preview /></Suspense> : <App />}
+    </BrowserRouter>
   </StrictMode>,
 );

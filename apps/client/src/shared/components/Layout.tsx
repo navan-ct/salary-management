@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import { type ReactElement, type ReactNode } from "react";
+import { Link } from "react-router";
 
 import { Button } from "./Button";
 
@@ -62,7 +63,7 @@ export function AppShell({ children, navigation, account }: AppShellProps): Reac
 interface PageHeaderProps {
   title: string;
   description?: ReactNode;
-  back?: { label: string; href: string };
+  back?: { label: string; to: string };
   actions?: ReactNode;
 }
 
@@ -70,10 +71,10 @@ export function PageHeader({ title, description, back, actions }: PageHeaderProp
   return (
     <header className="grid gap-sm">
       {back && (
-        <a href={back.href} className="inline-flex min-h-control items-center gap-sm justify-self-start rounded-control font-semibold text-brand underline hover:text-brand-hover focus-ring">
+        <Link to={back.to} className="inline-flex min-h-control items-center gap-sm justify-self-start rounded-control font-semibold text-brand underline hover:text-brand-hover focus-ring">
           <ArrowLeft aria-hidden="true" className="size-icon shrink-0" />
           {back.label}
-        </a>
+        </Link>
       )}
       <div className="flex flex-wrap items-start justify-between gap-md">
         <div className="grid min-w-0 gap-xs">

@@ -11,7 +11,13 @@ export default async function migrateTestDatabase(): Promise<void> {
   const { db, pool } = createDatabase(testDatabaseUrl());
 
   try {
-    await migrate(db, { migrationsFolder });
+    const lock = await pool.connect();
+    try {
+      await lock.query("select pg_advisory_lock(82750319)");
+      await migrate(db, { migrationsFolder });
+    } finally {
+      lock.release(true);
+    }
   } finally {
     await pool.end();
   }

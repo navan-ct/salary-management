@@ -78,5 +78,10 @@ export function useSession() {
     setSession({ status: "signed-out", expired: false });
   }
 
-  return { session, refresh, clearSession };
+  const expireSession = useCallback(() => {
+    request.current?.abort();
+    setSession({ status: "signed-out", expired: true });
+  }, []);
+
+  return { session, refresh, clearSession, expireSession };
 }

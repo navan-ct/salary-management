@@ -2,6 +2,27 @@ import { Faker, type LocaleDefinition, base, de, en, en_CA, en_GB, en_IN, en_US,
 
 const currencyMinorUnits = { BRL: 2, CAD: 2, EUR: 2, GBP: 2, INR: 2, JPY: 0, USD: 2 } as const;
 
+const japaneseNameLocale: LocaleDefinition = {
+  person: {
+    ...ja.person,
+    first_name: {
+      female: ["Aiko", "Aoi", "Ayumi", "Emi", "Haruka", "Hikari", "Keiko", "Mai", "Maki", "Megumi", "Mika",
+        "Minori", "Natsuki", "Rina", "Sakura", "Yui", "Yuka", "Yukari", "Yuki"],
+      male: ["Akira", "Daiki", "Haruto", "Hinata", "Hiroshi", "Kenji", "Kenta", "Naoki", "Ren", "Riku", "Shota",
+        "Takumi", "Taro", "Yuki", "Yuta"],
+    },
+    last_name: {
+      generic: ["Abe", "Endo", "Fujita", "Goto", "Hayashi", "Ikeda", "Inoue", "Ishikawa", "Ito", "Kato", "Kimura", "Kobayashi",
+        "Matsumoto", "Miura", "Mori", "Nakajima", "Nakamura", "Ogawa", "Okada", "Saito", "Sasaki", "Sato", "Shimizu",
+        "Suzuki", "Takahashi", "Tanaka", "Ueda", "Watanabe", "Yamada", "Yamaguchi", "Yamamoto", "Yoshida"],
+    },
+  },
+};
+
+const germanTransliterations = new Map([
+  ["Ä", "Ae"], ["Ö", "Oe"], ["Ü", "Ue"], ["ä", "ae"], ["ö", "oe"], ["ü", "ue"], ["ß", "ss"], ["ẞ", "SS"],
+]);
+
 const departments = [
   { name: "Engineering", weight: 27, payFactor: 1.24 },
   { name: "Customer Support", weight: 20, payFactor: 0.74 },
@@ -26,7 +47,7 @@ interface Market {
   readonly code: string;
   readonly name: string;
   readonly headcount: number;
-  readonly locale: LocaleDefinition;
+  readonly nameLocale: LocaleDefinition;
   readonly departmentWeights: Partial<Record<DepartmentName, number>>;
   readonly localPay: PayBand;
   readonly foreignPay?: { readonly share: number; readonly band: PayBand };
@@ -34,45 +55,45 @@ interface Market {
 
 const markets: readonly Market[] = [
   {
-    code: "IN", name: "India", headcount: 3_300, locale: en_IN,
+    code: "IN", name: "India", headcount: 3_300, nameLocale: en_IN,
     departmentWeights: { Engineering: 34, "Customer Support": 27, Sales: 8, Marketing: 3 },
     localPay: { currencyCode: "INR", midpoint: 1_140_000, floor: 270_000, step: 5_000 },
     foreignPay: { share: 0.04, band: { currencyCode: "USD", midpoint: 37_000, floor: 16_000, step: 250 } },
   },
   {
-    code: "US", name: "United States", headcount: 2_700, locale: en_US,
+    code: "US", name: "United States", headcount: 2_700, nameLocale: en_US,
     departmentWeights: { Engineering: 29, "Customer Support": 11, Sales: 22, Product: 12 },
     localPay: { currencyCode: "USD", midpoint: 88_000, floor: 39_000, step: 250 },
   },
   {
-    code: "GB", name: "United Kingdom", headcount: 1_300, locale: en_GB,
+    code: "GB", name: "United Kingdom", headcount: 1_300, nameLocale: en_GB,
     departmentWeights: { "Customer Support": 14, Sales: 19, Finance: 11, Marketing: 9 },
     localPay: { currencyCode: "GBP", midpoint: 49_000, floor: 27_000, step: 250 },
   },
   {
-    code: "DE", name: "Germany", headcount: 900, locale: de,
+    code: "DE", name: "Germany", headcount: 900, nameLocale: de,
     departmentWeights: { Engineering: 35, Operations: 22, "Customer Support": 12 },
     localPay: { currencyCode: "EUR", midpoint: 62_000, floor: 32_000, step: 250 },
   },
   {
-    code: "BR", name: "Brazil", headcount: 700, locale: pt_BR,
+    code: "BR", name: "Brazil", headcount: 700, nameLocale: pt_BR,
     departmentWeights: { Engineering: 17, "Customer Support": 29, Operations: 23 },
     localPay: { currencyCode: "BRL", midpoint: 98_000, floor: 36_000, step: 500 },
     foreignPay: { share: 0.04, band: { currencyCode: "USD", midpoint: 32_000, floor: 14_000, step: 250 } },
   },
   {
-    code: "CA", name: "Canada", headcount: 550, locale: en_CA,
+    code: "CA", name: "Canada", headcount: 550, nameLocale: en_CA,
     departmentWeights: { Engineering: 36, Product: 13, Sales: 10 },
     localPay: { currencyCode: "CAD", midpoint: 83_000, floor: 41_000, step: 250 },
     foreignPay: { share: 0.08, band: { currencyCode: "USD", midpoint: 73_000, floor: 36_000, step: 250 } },
   },
   {
-    code: "JP", name: "Japan", headcount: 350, locale: ja,
+    code: "JP", name: "Japan", headcount: 350, nameLocale: japaneseNameLocale,
     departmentWeights: { Sales: 25, Operations: 20, Product: 5 },
     localPay: { currencyCode: "JPY", midpoint: 6_050_000, floor: 2_800_000, step: 10_000 },
   },
   {
-    code: "FR", name: "France", headcount: 200, locale: fr,
+    code: "FR", name: "France", headcount: 200, nameLocale: fr,
     departmentWeights: { "Customer Support": 13, Sales: 25, Marketing: 13 },
     localPay: { currencyCode: "EUR", midpoint: 51_000, floor: 27_000, step: 250 },
   },
@@ -90,12 +111,20 @@ export const seedCountries = markets.map(({ code, name }) => ({ code, name }));
 export const seedCurrencies = Object.entries(currencyMinorUnits).map(([code, minorUnits]) => ({ code, minorUnits }));
 export const seedDepartmentNames = departments.map(({ name }) => name);
 
+function romanizeName(name: string, countryCode: string): string {
+  const expanded = countryCode === "DE"
+    ? name.replace(/[ÄÖÜäöüßẞ]/gu, (letter) => germanTransliterations.get(letter) ?? letter)
+    : name;
+
+  return expanded.normalize("NFD").replace(/\p{M}/gu, "").replaceAll("’", "'");
+}
+
 export function generateEmployeeSeed() {
   const randomizer = generateMersenne53Randomizer(20_261_119);
   const faker = new Faker({ locale: [en, base], randomizer });
   const locations = markets.map((market) => ({
     ...market,
-    names: new Faker({ locale: [market.locale, en, base], randomizer }).person,
+    names: new Faker({ locale: [market.nameLocale, en, base], randomizer }).person,
     departmentMix: departments.map((team) => ({ weight: market.departmentWeights[team.name] ?? team.weight, value: team })),
   }));
   const placements = faker.helpers.shuffle(locations.flatMap((location) =>
@@ -110,7 +139,8 @@ export function generateEmployeeSeed() {
       givenName = nameSource.names.firstName(sex);
     }
     const familyName = nameSource.names.lastName(sex);
-    const fullName = nameSource.code === "JP" ? `${familyName} ${givenName}` : `${givenName} ${familyName}`;
+    const localName = nameSource.code === "JP" ? `${familyName} ${givenName}` : `${givenName} ${familyName}`;
+    const fullName = romanizeName(localName, nameSource.code);
 
     const team = faker.helpers.weightedArrayElement(location.departmentMix);
     const pay = location.foreignPay && randomizer.next() < location.foreignPay.share ? location.foreignPay.band : location.localPay;

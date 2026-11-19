@@ -27,7 +27,7 @@ const employees = [
 const employeeColumns: readonly TableColumn<(typeof employees)[number]>[] = [
   {
     id: "name", header: "Employee name", rowHeader: true,
-    render: (row) => row.id === "AC-00042" ? <TextLink href="#record">{row.name}</TextLink> : row.name,
+    render: (row) => row.id === "AC-00042" ? <TextLink to="#record" reloadDocument>{row.name}</TextLink> : row.name,
   },
   { id: "id", header: "Employee ID", render: (row) => row.id },
   { id: "country", header: "Country", render: (row) => row.country },

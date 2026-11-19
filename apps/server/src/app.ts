@@ -68,7 +68,7 @@ export function createApp({
   api.use(["/employees", "/insights"], requireSession(auth));
   api.use(express.json({ limit: "64kb" }));
   api.use("/health", createHealthRouter(db));
-  api.use("/employees", createEmployeesRouter());
+  api.use("/employees", createEmployeesRouter(db));
   api.use((_req, res) => {
     sendError(res, "notFound");
   });
