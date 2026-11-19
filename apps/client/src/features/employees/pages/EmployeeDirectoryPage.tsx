@@ -2,13 +2,13 @@ import { type ReactElement, useCallback } from "react";
 import { useLocation, useSearchParams } from "react-router";
 
 import { Button, TextLink } from "../../../shared/components/Button";
-import { DataTable, Pagination, type TableColumn } from "../../../shared/components/DataTable";
+import { DataTable, type TableColumn } from "../../../shared/components/DataTable";
 import { StatePanel } from "../../../shared/components/Feedback";
-import { PageHeader, Panel } from "../../../shared/components/Layout";
+import { Initials, PageHeader } from "../../../shared/components/Layout";
+import { SalaryAmount } from "../../../shared/components/SalaryAmount";
 import { type SelectOption, SelectField } from "../../../shared/components/SelectField";
 import { SearchField } from "../../../shared/components/TextField";
 import { useApiRequest } from "../../../shared/hooks/use-api-request";
-import { formatSalary } from "../../../shared/utils/format-salary";
 import { type Employee, getDirectory } from "../api/employees";
 import { employeeRecordPath } from "../utils/record-navigation";
 
@@ -59,16 +59,18 @@ export function EmployeeDirectoryPage({ onSessionExpired }: { onSessionExpired: 
     {
       id: "name", header: "Employee name", rowHeader: true,
       render: ({ employeeId, fullName }) => (
-        <TextLink to={employeeRecordPath(employeeId)} state={{ directorySearch }}>{fullName}</TextLink>
+        <TextLink to={employeeRecordPath(employeeId)} state={{ directorySearch }}>
+          <Initials name={fullName} />{fullName}
+        </TextLink>
       ),
     },
-    { id: "id", header: "Employee ID", render: ({ employeeId }) => employeeId },
+    { id: "id", header: "Employee ID", render: ({ employeeId }) => <span className="font-mono text-caption">{employeeId}</span> },
     { id: "country", header: "Country", render: ({ countryName }) => countryName },
-    { id: "department", header: "Department", render: ({ departmentName }) => departmentName },
+    { id: "department", header: "Department", render: ({ departmentName }) => <span className="department-tag">{departmentName}</span> },
     {
       id: "salary", header: "Current annual base salary", numeric: true,
       render: ({ annualBaseSalary, salaryCurrencyCode, salaryMinorUnits }) =>
-        formatSalary(annualBaseSalary, salaryCurrencyCode, salaryMinorUnits),
+        <SalaryAmount amount={annualBaseSalary} currency={salaryCurrencyCode} minorUnits={salaryMinorUnits} />,
     },
   ];
 
@@ -80,11 +82,9 @@ export function EmployeeDirectoryPage({ onSessionExpired }: { onSessionExpired: 
     results = employees.length === 0 ? (
       <StatePanel state="empty" title="No matching employees" description="Try another name or employee ID, or clear one or more filters." />
     ) : (
-      <>
-        <DataTable caption="Employees" rows={employees} columns={columns} getRowKey={({ employeeId }) => employeeId} />
-        <Pagination page={page} pageCount={Math.ceil(total / pageSize)} onPageChange={changePage}
-          summary={`Showing ${countFormat.format(start)}–${countFormat.format(end)} of ${countFormat.format(total)} employees`} />
-      </>
+      <DataTable caption="Employees" rows={employees} columns={columns} getRowKey={({ employeeId }) => employeeId}
+        pagination={{ page, pageCount: Math.ceil(total / pageSize), onPageChange: changePage,
+          summary: `Showing ${countFormat.format(start)}–${countFormat.format(end)} of ${countFormat.format(total)} employees` }} />
     );
   } else if (result.status === "loading") {
     results = <StatePanel state="loading" title="Loading employees…" />;
@@ -96,8 +96,8 @@ export function EmployeeDirectoryPage({ onSessionExpired }: { onSessionExpired: 
   return (
     <>
       <PageHeader title="Employee directory" />
-      <Panel>
-        <div className="grid gap-md sm:grid-cols-3">
+      <div className="grid gap-sm">
+        <div className="directory-filters">
           <SearchField label="Employee name or ID" name="search" value={search}
             placeholder="e.g. Aditi Sharma or AC-00042" onValueChange={(value) => {
               changeFilter("search", value);
@@ -116,7 +116,7 @@ export function EmployeeDirectoryPage({ onSessionExpired }: { onSessionExpired: 
             }}>Clear all</Button>
           </div>
         )}
-      </Panel>
+      </div>
       {results}
     </>
   );

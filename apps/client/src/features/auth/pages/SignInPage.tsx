@@ -3,7 +3,7 @@ import { type ReactElement, useState } from "react";
 import { Button } from "../../../shared/components/Button";
 import { Notice } from "../../../shared/components/Feedback";
 import { Form } from "../../../shared/components/Form";
-import { PageContainer, PageHeader, Panel } from "../../../shared/components/Layout";
+import { Brand, CanopyPattern, PageContainer } from "../../../shared/components/Layout";
 import { TextField } from "../../../shared/components/TextField";
 import { authClient } from "../api/client";
 
@@ -54,25 +54,30 @@ export function SignInPage({ expired, onSignedIn }: SignInPageProps): ReactEleme
 
   return (
     <PageContainer narrow>
-      <Panel>
-        <p className="text-heading font-semibold">ACME Salary Management</p>
-        <PageHeader title="Sign in" description={expired ? undefined : "For authorized ACME HR managers."} />
-        {expired && (
-          <Notice title="Your session expired" tone="warning" announce>
-            Sign in again to access salary data.
-          </Notice>
-        )}
-        {error !== undefined && <Notice title={error} tone="error" announce />}
-        <Form onSubmit={(data) => {
-          void signIn(data);
-        }} busy={busy}>
-          <TextField label="Work email" name="email" type="email" autoComplete="username" placeholder="name@acme.com" required />
-          <TextField label="Password" name="password" type="password" autoComplete="current-password" required />
-          <div className="grid">
-            <Button type="submit" pendingLabel={busy ? "Signing in…" : undefined}>Sign in</Button>
-          </div>
-        </Form>
-      </Panel>
+      <div className="sign-in-card">
+        <div className="sign-in-brand"><CanopyPattern /><Brand /></div>
+        <div className="grid gap-lg p-xl sm:p-2xl">
+          <header className="grid gap-sm">
+            <h1 className="text-title font-semibold tracking-title">Sign in</h1>
+            {!expired && <p className="text-muted">For authorized ACME HR managers.</p>}
+          </header>
+          {expired && (
+            <Notice title="Your session expired" tone="warning" announce>
+              Sign in again to access salary data.
+            </Notice>
+          )}
+          {error !== undefined && <Notice title={error} tone="error" announce />}
+          <Form onSubmit={(data) => {
+            void signIn(data);
+          }} busy={busy}>
+            <TextField label="Work email" name="email" type="email" autoComplete="username" placeholder="name@acme.com" required />
+            <TextField label="Password" name="password" type="password" autoComplete="current-password" required />
+            <div className="grid">
+              <Button type="submit" pendingLabel={busy ? "Signing in…" : undefined}>Sign in</Button>
+            </div>
+          </Form>
+        </div>
+      </div>
     </PageContainer>
   );
 }

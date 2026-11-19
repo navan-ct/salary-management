@@ -5,12 +5,12 @@ import { ActionDialog } from "../../../shared/components/ActionDialog";
 import { Button } from "../../../shared/components/Button";
 import { Notice, StatePanel } from "../../../shared/components/Feedback";
 import { Form, FormActions } from "../../../shared/components/Form";
-import { DetailList, PageHeader, Panel } from "../../../shared/components/Layout";
+import { PageHeader } from "../../../shared/components/Layout";
 import { SelectField } from "../../../shared/components/SelectField";
 import { TextField, TextareaField } from "../../../shared/components/TextField";
 import { useApiRequest } from "../../../shared/hooks/use-api-request";
-import { formatSalary } from "../../../shared/utils/format-salary";
 import { type EmployeeRecord, type SalaryFieldErrors, getEmployeeRecord, saveEmployeeSalary } from "../api/employees";
+import { SalarySummary } from "../components/SalarySummary";
 import { employeeRecordPath, employeeRecordState } from "../utils/record-navigation";
 
 const currencyNames = new Intl.DisplayNames("en", { type: "currency", fallback: "none" });
@@ -124,41 +124,34 @@ function ChangeSalaryForm({ employee, currencies, onSaved, onLeave, onSessionExp
   return (
     <>
       <PageHeader title="Change salary" description={`${employee.fullName} · ${employee.employeeId}`} />
-      <Panel>
-        <DetailList details={[{
-          label: "Current annual base salary",
-          value: formatSalary(employee.annualBaseSalary, employee.salaryCurrencyCode, employee.salaryMinorUnits),
-          emphasis: true,
-        }]} />
-        <div className="border-t border-line" />
-        <Form onSubmit={save} busy={pending} errors={fieldErrors}>
-          <div className="grid w-full max-w-table gap-md">
-            {formError && <Notice tone="error" title={formError} announce />}
-            <div className="w-full sm:w-menu">
-              <SelectField label="Currency" name="salaryCurrencyCode" value={code} onValueChange={changeCurrency} disabled={pending} required
-                options={currencies.map(({ code: value }) => {
-                  const name = currencyNames.of(value);
-                  return { value, label: name ? `${value} · ${name}` : value };
-                })} />
-            </div>
-            <TextField label="Annual base salary" name="annualBaseSalary" inputMode="decimal" placeholder="Enter annual amount"
-              value={amount} onValueChange={(value) => {
-                setAmount(value);
-                setFormError(undefined);
-              }} description={`${amountHelp} ${precision}`} validate={validateAmount} required readOnly={pending} />
-            <TextareaField label="Reason for change" name="reason" placeholder="Enter a reason" value={reason} validate={validateReason}
-              onValueChange={(value) => {
-                setReason(value);
-                setFormError(undefined);
-              }} required readOnly={pending} />
-            <FormActions>
-              <Button ref={saveButton} type="submit" disabled={amount === "" && reason === ""}
-                pendingLabel={pending ? "Saving salary change…" : undefined}>Save salary change</Button>
-              <Button variant="secondary" disabled={pending} onClick={onLeave}>Cancel</Button>
-            </FormActions>
+      <SalarySummary employee={employee} />
+      <Form onSubmit={save} busy={pending} errors={fieldErrors}>
+        <div className="grid w-full max-w-editor gap-lg">
+          {formError && <Notice tone="error" title={formError} announce />}
+          <div className="w-full sm:w-menu">
+            <SelectField label="Currency" name="salaryCurrencyCode" value={code} onValueChange={changeCurrency} disabled={pending} required
+              options={currencies.map(({ code: value }) => {
+                const name = currencyNames.of(value);
+                return { value, label: name ? `${value} · ${name}` : value };
+              })} />
           </div>
-        </Form>
-      </Panel>
+          <TextField label="Annual base salary" name="annualBaseSalary" inputMode="decimal" placeholder="Enter annual amount"
+            value={amount} onValueChange={(value) => {
+              setAmount(value);
+              setFormError(undefined);
+            }} description={`${amountHelp} ${precision}`} validate={validateAmount} required readOnly={pending} />
+          <TextareaField label="Reason for change" name="reason" placeholder="Enter a reason" value={reason} validate={validateReason}
+            onValueChange={(value) => {
+              setReason(value);
+              setFormError(undefined);
+            }} required readOnly={pending} />
+          <FormActions>
+            <Button ref={saveButton} type="submit" disabled={amount === "" && reason === ""}
+              pendingLabel={pending ? "Saving salary change…" : undefined}>Save salary change</Button>
+            <Button variant="secondary" disabled={pending} onClick={onLeave}>Cancel</Button>
+          </FormActions>
+        </div>
+      </Form>
       <ActionDialog open={saveState !== "idle" && saveState !== "saving"}
         title={recovery[recoveryKind].title} description={recovery[recoveryKind].description}
         primary={recoveryKind === "failure" ? { label: "Retry save", onClick: save } : { label: "Reload employee record", onClick: onLeave }}

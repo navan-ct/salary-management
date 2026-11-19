@@ -4,9 +4,9 @@ import { Button } from "../../../shared/components/Button";
 import { DataTable, type TableColumn } from "../../../shared/components/DataTable";
 import { StatePanel } from "../../../shared/components/Feedback";
 import { PageHeader } from "../../../shared/components/Layout";
+import { SalaryAmount } from "../../../shared/components/SalaryAmount";
 import { SelectField } from "../../../shared/components/SelectField";
 import { useApiRequest } from "../../../shared/hooks/use-api-request";
-import { formatSalary } from "../../../shared/utils/format-salary";
 import { type Country, type ReportRow, getCountryReport, getDepartmentRows } from "../api/insights";
 
 const allCountries = { value: "all", label: "All countries" };
@@ -32,12 +32,12 @@ export function PayInsightsPage({ onSessionExpired }: { onSessionExpired: () => 
   const scope = country === undefined ? "By country" : `By department in ${country.name}`;
   const columns: readonly TableColumn<ReportRow>[] = [
     { id: "group", header: country === undefined ? "Country" : "Department", rowHeader: true, render: ({ groupName }) => groupName },
-    { id: "currency", header: "Currency", render: ({ salaryCurrencyCode }) => salaryCurrencyCode },
+    { id: "currency", header: "Currency", render: ({ salaryCurrencyCode }) => <span className="font-mono text-caption">{salaryCurrencyCode}</span> },
     { id: "headcount", header: "Headcount", numeric: true, render: ({ headcount }) => countFormat.format(headcount) },
     {
       id: "median", header: "Median annual base salary", numeric: true,
       render: ({ medianAnnualBaseSalary, salaryCurrencyCode, salaryMinorUnits }) =>
-        formatSalary(medianAnnualBaseSalary, salaryCurrencyCode, salaryMinorUnits),
+        <SalaryAmount amount={medianAnnualBaseSalary} currency={salaryCurrencyCode} minorUnits={salaryMinorUnits} />,
     },
   ];
 

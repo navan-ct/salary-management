@@ -52,7 +52,7 @@ interface TextLinkProps {
 export function TextLink({ to, state, reloadDocument = false, children, label }: TextLinkProps): ReactElement {
   return (
     <Link to={to} state={state} reloadDocument={reloadDocument} aria-label={label}
-      className="rounded-control font-semibold text-brand underline hover:text-brand-hover focus-ring">
+      className="inline-flex items-center gap-sm rounded-control font-semibold text-brand hover:text-brand-hover hover:underline focus-ring">
       {children}
     </Link>
   );

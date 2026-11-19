@@ -1,3 +1,4 @@
+import { ChartNoAxesColumn, Users } from "lucide-react";
 import { type ReactElement, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router";
 
@@ -53,8 +54,8 @@ function AuthenticatedApp({ name, onSignedOut, onSessionExpired }: Authenticated
   }
 
   const navigation = [
-    { label: "Employees", href: directoryPath, active: pathname.startsWith(`${directoryPath}/`), current: pathname === directoryPath },
-    { label: "Pay insights", href: insightsPath, current: pathname === insightsPath },
+    { label: "Employees", icon: Users, href: directoryPath, active: pathname.startsWith(`${directoryPath}/`), current: pathname === directoryPath },
+    { label: "Pay insights", icon: ChartNoAxesColumn, href: insightsPath, current: pathname === insightsPath },
   ];
 
   return (

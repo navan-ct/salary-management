@@ -1,11 +1,12 @@
+import { ChartNoAxesColumn, Users } from "lucide-react";
 import { type ReactElement, useRef, useState } from "react";
 
 import { ActionDialog } from "../../shared/components/ActionDialog";
 import { Button, TextLink } from "../../shared/components/Button";
-import { DataTable, Pagination, type TableColumn } from "../../shared/components/DataTable";
+import { DataTable, type TableColumn } from "../../shared/components/DataTable";
 import { Notice, StatePanel } from "../../shared/components/Feedback";
 import { Form, FormActions } from "../../shared/components/Form";
-import { AppShell, DetailList, PageContainer, PageHeader, Panel } from "../../shared/components/Layout";
+import { AppShell, DetailList, Initials, PageContainer, PageHeader, Panel } from "../../shared/components/Layout";
 import { SelectField } from "../../shared/components/SelectField";
 import { SearchField, TextareaField, TextField } from "../../shared/components/TextField";
 
@@ -27,11 +28,12 @@ const employees = [
 const employeeColumns: readonly TableColumn<(typeof employees)[number]>[] = [
   {
     id: "name", header: "Employee name", rowHeader: true,
-    render: (row) => row.id === "AC-00042" ? <TextLink to="#record" reloadDocument>{row.name}</TextLink> : row.name,
+    render: (row) => <span className="inline-flex items-center gap-sm"><Initials name={row.name} />
+      {row.id === "AC-00042" ? <TextLink to="#record" reloadDocument>{row.name}</TextLink> : row.name}</span>,
   },
   { id: "id", header: "Employee ID", render: (row) => row.id },
   { id: "country", header: "Country", render: (row) => row.country },
-  { id: "department", header: "Department", render: (row) => row.department },
+  { id: "department", header: "Department", render: (row) => <span className="department-tag">{row.department}</span> },
   { id: "salary", header: "Current annual base salary", numeric: true, render: (row) => row.salary },
 ];
 
@@ -90,12 +92,9 @@ function DirectoryPreview(): ReactElement {
         <StatePanel state="empty" title="No matching employees" description="Try another name or employee ID, or clear one or more filters." />
       )}
       {state === "ready" && rows.length > 0 && (
-        <>
-          <DataTable caption="Employees" rows={rows} columns={employeeColumns} getRowKey={(row) => row.id} />
-          <Pagination page={page} pageCount={Math.ceil(matches.length / pageSize)} onPageChange={setPage}
-            summary={`Showing ${String((page - 1) * pageSize + 1)}–${String((page - 1) * pageSize + rows.length)} of ${String(matches.length)} employees`}
-          />
-        </>
+        <DataTable caption="Employees" rows={rows} columns={employeeColumns} getRowKey={(row) => row.id}
+          pagination={{ page, pageCount: Math.ceil(matches.length / pageSize), onPageChange: setPage,
+            summary: `Showing ${String((page - 1) * pageSize + 1)}–${String((page - 1) * pageSize + rows.length)} of ${String(matches.length)} employees` }} />
       )}
     </section>
   );
@@ -241,7 +240,7 @@ export default function DesignSystemPreview(): ReactElement {
 
   return (
     <AppShell navigation={[
-      { label: "Employees", href: "#employees", active: true }, { label: "Pay insights", href: "#pay-insights" },
+      { label: "Employees", href: "#employees", icon: Users, active: true }, { label: "Pay insights", href: "#pay-insights", icon: ChartNoAxesColumn },
     ]} account={signedOut ? undefined : { name: "Devika Rao", onSignOut: () => {
       setSignedOut(true);
       window.location.hash = "sign-in";

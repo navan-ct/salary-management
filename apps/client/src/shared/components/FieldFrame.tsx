@@ -15,7 +15,7 @@ export function FieldFrame({ label, name, description, error, disabled, validate
 }): ReactElement {
   return (
     <Field.Root name={name} disabled={disabled} validate={validate} invalid={error ? true : undefined} className="grid min-w-0 content-start gap-xs">
-      <Field.Label className="text-body font-semibold">{label}</Field.Label>
+      <Field.Label className="text-caption font-semibold">{label}</Field.Label>
       {children}
       {description && <Field.Description className="text-caption text-muted">{description}</Field.Description>}
       {error

@@ -1,13 +1,15 @@
+import { Badge, Layers, MapPin, Pencil } from "lucide-react";
 import { type ReactElement, useCallback } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 
 import { Button, TextLink } from "../../../shared/components/Button";
 import { DataTable, type TableColumn } from "../../../shared/components/DataTable";
 import { Notice, StatePanel } from "../../../shared/components/Feedback";
-import { DetailList, PageHeader, Panel } from "../../../shared/components/Layout";
+import { PageHeader } from "../../../shared/components/Layout";
+import { SalaryAmount } from "../../../shared/components/SalaryAmount";
 import { useApiRequest } from "../../../shared/hooks/use-api-request";
-import { formatSalary } from "../../../shared/utils/format-salary";
 import { type SalaryChange, getEmployeeRecord } from "../api/employees";
+import { SalarySummary } from "../components/SalarySummary";
 import { formatSavedAt } from "../utils/format";
 import { employeeRecordPath, employeeRecordState } from "../utils/record-navigation";
 
@@ -19,11 +21,11 @@ const historyColumns: readonly TableColumn<SalaryChange>[] = [
   {
     id: "previous", header: "Previous salary", numeric: true,
     render: ({ previousAmount, previousCurrencyCode, previousMinorUnits }) =>
-      formatSalary(previousAmount, previousCurrencyCode, previousMinorUnits),
+      <SalaryAmount amount={previousAmount} currency={previousCurrencyCode} minorUnits={previousMinorUnits} />,
   },
   {
     id: "new", header: "New salary", numeric: true,
-    render: ({ newAmount, newCurrencyCode, newMinorUnits }) => formatSalary(newAmount, newCurrencyCode, newMinorUnits),
+    render: ({ newAmount, newCurrencyCode, newMinorUnits }) => <SalaryAmount amount={newAmount} currency={newCurrencyCode} minorUnits={newMinorUnits} />,
   },
   { id: "reason", header: "Reason", render: ({ reason }) => reason },
   { id: "editor", header: "Saved by", render: ({ editorName }) => editorName },
@@ -58,31 +60,25 @@ export function EmployeeRecordPage({ onSessionExpired }: { onSessionExpired: () 
       const { employee, history } = result.data;
       return (
         <>
-          <PageHeader title={employee.fullName} back={back} />
+          <PageHeader title={employee.fullName} back={back} description={
+            <dl className="record-meta">
+              <div><dt><Badge aria-hidden="true" className="size-icon" /><span className="sr-only">Employee ID</span></dt><dd>{employee.employeeId}</dd></div>
+              <div><dt><MapPin aria-hidden="true" className="size-icon" /><span className="sr-only">Country</span></dt><dd>{employee.countryName}</dd></div>
+              <div><dt><Layers aria-hidden="true" className="size-icon" /><span className="sr-only">Department</span></dt><dd>{employee.departmentName}</dd></div>
+            </dl>
+          } />
           {confirmation}
-          <Panel>
-            <DetailList details={[
-              { label: "Employee ID", value: employee.employeeId },
-              { label: "Country", value: employee.countryName },
-              { label: "Department", value: employee.departmentName },
-            ]} />
-            <div className="border-t border-line" />
-            <div className="flex flex-wrap items-center justify-between gap-lg">
-              <DetailList details={[{
-                label: "Current annual base salary",
-                value: formatSalary(employee.annualBaseSalary, employee.salaryCurrencyCode, employee.salaryMinorUnits),
-                emphasis: true,
-              }]} />
-              <Button onClick={() => {
-                void navigate(`${employeeRecordPath(employeeId)}/change-salary`, { state: { directorySearch } });
-              }}>Change salary</Button>
-            </div>
-          </Panel>
-          <Panel title="Salary history">
+          <SalarySummary employee={employee} action={
+            <Button onClick={() => {
+              void navigate(`${employeeRecordPath(employeeId)}/change-salary`, { state: { directorySearch } });
+            }}><Pencil aria-hidden="true" className="size-icon" />Change salary</Button>
+          } />
+          <section className="grid min-w-0 gap-lg" aria-labelledby="salary-history">
+            <h2 id="salary-history" className="text-heading font-semibold">Salary history</h2>
             {history.length === 0
-              ? <p className="text-muted">No salary changes have been recorded for this employee.</p>
+              ? <p className="table-panel px-lg py-xl text-muted">No salary changes have been recorded for this employee.</p>
               : <DataTable caption="Salary history" rows={history} columns={historyColumns} getRowKey={({ salaryVersion }) => salaryVersion} />}
-          </Panel>
+          </section>
         </>
       );
     }
